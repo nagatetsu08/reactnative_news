@@ -7,12 +7,14 @@ import {StyleSheet, Text, View, Image, TouchableOpacity} from 'react-native';
  *  imageUrl: string ニュースのURL
  *  title: string ニュースのタイトル
  *  author: string ニュースの著者
+ *  onPress: タップされた時のイベント処理
  * } props 
  * @returns 
  */
 export const ListItem = (props) => {
   return (
-    <View style={styles.itemContainer}>
+    // TouchableOpacityで囲むとタップ可能になる
+    <TouchableOpacity style={styles.itemContainer} onPress={props.onPress}>
       <View style={styles.leftContainer}>
         <Image
             style={{width: 100, height: 100}}
@@ -25,7 +27,7 @@ export const ListItem = (props) => {
         </Text>
         <Text style={styles.subText}>{props.author}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 

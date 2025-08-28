@@ -5,45 +5,59 @@ import { ListItem } from './components/ListItem';
 import dummyArticles from './dummies/articles.json';
 import axios from 'axios';
 import Constants from 'expo-constants';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { HomeScreen } from './screens/HomeScreen';
+import { ArticleScreen } from './screens/ArticleScreen';
+import { ClipScreen } from './screens/ClipScreen';
+import { FontAwesome } from '@expo/vector-icons';
 
-// 仕様が変わったみたい。。。
+// 仕様が変わった。
+// 2025/08/26現在、日本語の記事が取得できないのでUSに変更
 const apiKey = Constants.expoConfig?.extra?.newsApiKey;
 const URL = `https://newsapi.org/v2/top-headlines?country=us&category=business&apiKey=${apiKey}`;
 
-export default function App() {
-  const [articles, setArticles] = useState([]);
+const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
 
-  const fetchArticles = async() => {
-    try {
-      const response = await axios.get(URL);
-      // console.log(response.data.articles)
-      setArticles(response.data.articles);
-    } catch (error) {
-      console.error(error)
-    }
-    // setArticles(dummyArticles);
-  }
+/**
+ * 以下のようにStackとして切り出すことで、Home画面以降の遷移をグルーピングできる。
+ * 
+ */
 
-  // 画面の初期化時に1回だけ実行される（第二引数に空の配列を渡しているとそうなる）
-  useEffect(() => {
-    fetchArticles();
-  }, [])
-
+const HomeStack = () => {
   return (
-    <SafeAreaView style={styles.container}>
-      <FlatList
-        data={articles}
-        renderItem={({item}) => {
-          return <ListItem
-            imageUrl={item.urlToImage}
-            title={item.title}
-            author={item.author}
-          />
-        }}
-        keyExtractor={(item, index) => index.toString()}
-      />
-      <StatusBar style="auto" />
-    </SafeAreaView>
+    <Stack.Navigator>
+      <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="Article" component={ArticleScreen} />
+    </Stack.Navigator>
+  )
+}
+
+const ScreenOption = ({ route }) => ({
+          tabBarIcon: ({ color, size }) => {
+            let iconName;
+
+            if (route.name === 'HomeTab') {
+              iconName = "home";
+            } else if (route.name === 'ClipTab') {
+              iconName = "bookmark";
+            }
+
+            // You can return any component that you like here!
+            return <FontAwesome name={iconName} size={size} color={color} />;
+          },
+        })
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Tab.Navigator screenOptions={ScreenOption}>
+        <Tab.Screen name="HomeTab" component={HomeStack} options={{ headerShown: false, title: "Home" }} />
+        <Tab.Screen name="ClipTab" component={ClipScreen} options={{ headerShown: false, title: "Clip" }} />
+      </Tab.Navigator>
+    </NavigationContainer>
   );
 }
 
